@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/.venv/
+backend/venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build artifacts
+frontend/dist/
+frontend/build/
+backend/dist/
+*.egg-info/
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Local databases & logs
+*.db
+*.sqlite
+*.sqlite3
+backend/keysprint.db
+logs/
+*.log
+
+# Test & coverage
+coverage/
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Secret keys
+*.pem
+*.key

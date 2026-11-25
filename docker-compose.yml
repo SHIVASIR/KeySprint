@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-keysprint}
+      POSTGRES_USER: ${POSTGRES_USER:-keysprint}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-keysprint}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-keysprint}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      SECRET_KEY: ${BACKEND_SECRET_KEY:-dev-insecure-change-me-in-production-keysprint-secret}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-keysprint}:${POSTGRES_PASSWORD:-keysprint}@postgres:5432/${POSTGRES_DB:-keysprint}
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:8080,http://localhost:5173}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  pg_data:
